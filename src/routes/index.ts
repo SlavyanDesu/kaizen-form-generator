@@ -1,10 +1,19 @@
 import type { Application } from "express";
+import multer from "multer";
 import { generateKaizenController } from "../controllers/kaizen.controller.js";
 
-export const routes = (app: Application): void => {
-  app.get("/", (req, res) => {
-    res.render("index");
-  });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 2, fileSize: 10 * 1024 * 1024 },
+});
 
-  app.post("/api/kaizen/generate", generateKaizenController);
+export const routes = (app: Application): void => {
+  app.post(
+    "/api/kaizen/generate",
+    upload.fields([
+      { name: "photographBefore", maxCount: 1 },
+      { name: "photographAfter", maxCount: 1 },
+    ]),
+    generateKaizenController,
+  );
 };

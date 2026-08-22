@@ -1,20 +1,40 @@
 import type { Request, Response } from "express";
+import { kaizenDataSchema, type KaizenData } from "../schemas/kaizen.schema.js";
 import { generateKaizen } from "../services/kaizen.service.js";
-import type { KaizenData } from "../types/kaizen.js";
+
+interface UploadFiles {
+  photographBefore?: Express.Multer.File[];
+  photographAfter?: Express.Multer.File[];
+}
 
 export async function generateKaizenController(req: Request, res: Response) {
   try {
-    const data = req.body as KaizenData;
+    const result = kaizenDataSchema.safeParse(req.body);
 
-    const result = await generateKaizen(data);
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Kaizen form data.",
+        issues: result.error.issues,
+      });
+    }
 
-    return res.download(result.path, result.filename, (error) => {
-      if (error) {
-        console.error("Download error:", error);
-      }
-    });
-  } catch (error) {
-    console.error("Failed to generate Kaizen:", error);
+    const files = (req.files as UploadFiles | undefined) ?? {};
+    const data: KaizenData = {
+      ...result.data,
+      ...(files.photographBefore?.[0]
+        ? { photographBefore: files.photographBefore[0] }
+        : {}),
+      ...(files.photographAfter?.[0]
+        ? { photographAfter: files.photographAfter[0] }
+        : {}),
+    };
+
+    const file = await generateKaizen(data);
+
+    return res.attachment(file.filename).send(file.buffer);
+  } catch (err) {
+    console.error("Failed to generate Kaizen:", err);
 
     return res.status(500).send("Failed to generate Kaizen file.");
   }
