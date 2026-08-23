@@ -1,7 +1,8 @@
 const savedTheme = localStorage.getItem("kaizen-theme");
-const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
+const prefersDark = colorScheme.matches;
 
-if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+if (savedTheme === "dark" || (savedTheme !== "light" && prefersDark)) {
   document.documentElement.dataset.theme = "dark";
 }
 
@@ -111,34 +112,50 @@ document.addEventListener("DOMContentLoaded", () => {
   cancelCropButton.addEventListener("click", () => closeCropper(true));
   cancelCropAction.addEventListener("click", () => closeCropper(true));
 
-  const themeToggle = document.getElementById("themeToggle");
-  const themeIcon = themeToggle.querySelector(".theme-icon");
+  const themeButtons = document.querySelectorAll("[data-theme-choice]");
 
   const updateThemeToggle = () => {
-    const isDark = document.documentElement.dataset.theme === "dark";
-    themeIcon.textContent = isDark ? "☼" : "◐";
-    themeToggle.setAttribute(
-      "aria-label",
-      isDark ? "Switch to light mode" : "Switch to dark mode",
-    );
+    const activeTheme = localStorage.getItem("kaizen-theme") ?? "system";
+
+    themeButtons.forEach((button) => {
+      const isActive = button.dataset.themeChoice === activeTheme;
+      button.setAttribute("aria-checked", String(isActive));
+      button.setAttribute("aria-pressed", String(isActive));
+    });
   };
 
   updateThemeToggle();
 
   const setTheme = (theme) => {
-    document.documentElement.dataset.theme = theme;
+    if (theme === "dark" || (theme === "system" && colorScheme.matches)) {
+      document.documentElement.dataset.theme = "dark";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+
     localStorage.setItem("kaizen-theme", theme);
     updateThemeToggle();
   };
 
-  themeToggle.addEventListener("click", () => {
-    const isDark = document.documentElement.dataset.theme === "dark";
-    const nextTheme = isDark ? "light" : "dark";
+  themeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const theme = button.dataset.themeChoice;
 
-    if (document.startViewTransition) {
-      document.startViewTransition(() => setTheme(nextTheme));
-    } else {
-      setTheme(nextTheme);
+      if (!theme) {
+        return;
+      }
+
+      if (document.startViewTransition) {
+        document.startViewTransition(() => setTheme(theme));
+      } else {
+        setTheme(theme);
+      }
+    });
+  });
+
+  colorScheme.addEventListener("change", () => {
+    if ((localStorage.getItem("kaizen-theme") ?? "system") === "system") {
+      setTheme("system");
     }
   });
 

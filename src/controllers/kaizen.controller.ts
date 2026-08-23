@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { kaizenDataSchema, type KaizenData } from "../schemas/kaizen.schema.js";
-import { generateKaizen } from "../services/kaizen.service.js";
+import { generateKaizen } from "../services/kaizenGenerator.js";
 
 interface UploadFiles {
   photographBefore?: Express.Multer.File[];

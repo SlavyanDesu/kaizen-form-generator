@@ -3,6 +3,7 @@ import { z } from "zod";
 const requiredText = z.string().trim().min(1);
 const optionalText = z.string().trim().optional().default("");
 
+// Helper function to extract year, month, and day from a date string in the format "YYYY-MM-DD"
 function getDateParts(value: string): [number, number, number] | undefined {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
@@ -13,6 +14,10 @@ function getDateParts(value: string): [number, number, number] | undefined {
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
+/**
+ * Validates a date string in the format "YYYY-MM-DD" and transforms it into a Date object.
+ * Ensures that the date is a valid calendar date.
+ */
 const dateText = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)

@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 
-import { fields } from "../configs/kaizen-fields.js";
+import { fields } from "../constants/fields.js";
 import type { KaizenData } from "../schemas/kaizen.schema.js";
 import sharp from "sharp";
 
@@ -46,7 +46,7 @@ export async function generateKaizen(data: KaizenData) {
   const worksheet = workbook.getWorksheet("SOP-0811-F01");
 
   if (!worksheet) {
-    throw new Error("Worksheet not found in the template.");
+    throw new Error("Worksheet not found.");
   }
 
   worksheet.getCell(fields.theme).value = data.theme;
