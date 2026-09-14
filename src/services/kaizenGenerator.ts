@@ -2,12 +2,36 @@ import ExcelJS from "exceljs";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 
-import { fields } from "../constants/fields.js";
 import type { KaizenData } from "../schemas/kaizen.schema.js";
 import sharp from "sharp";
 
-const templatePath = path.resolve("templates/template.xlsx");
+const templatePath = path.resolve(
+  import.meta.dirname,
+  "../../templates/template.xlsx",
+);
 
+const fields = {
+  theme: "E6",
+  unit: "S7",
+  department: "T7",
+  date: "U7",
+  suggestedBy: "E11",
+  implementedBy: "E12",
+  problem: "B15",
+  whereFound: "J15",
+  whenFound: "J18",
+  countermeasure: "L15",
+  whereImplement: "T15",
+  whenImplement: "T18",
+  afterKaizen: "B31",
+  tangibleBenefit: "L31",
+  intangibleBenefit: "P31",
+  whereImplemented: "T31",
+  whenImplemented: "T34",
+  issueDate: "R51",
+} as const;
+
+// 1-indexed Excel coordinates; ExcelJS positions are 0-indexed → subtract 1 below.
 const photoAreas = {
   before: { columnStart: 2, columnEnd: 11, rowStart: 21, rowEnd: 29 },
   after: { columnStart: 12, columnEnd: 21, rowStart: 21, rowEnd: 29 },
@@ -49,24 +73,9 @@ export async function generateKaizen(data: KaizenData) {
     throw new Error("Worksheet not found.");
   }
 
-  worksheet.getCell(fields.theme).value = data.theme;
-  worksheet.getCell(fields.unit).value = data.unit;
-  worksheet.getCell(fields.department).value = data.department;
-  worksheet.getCell(fields.date).value = data.date;
-  worksheet.getCell(fields.suggestedBy).value = data.suggestedBy;
-  worksheet.getCell(fields.implementedBy).value = data.implementedBy;
-  worksheet.getCell(fields.problem).value = data.problem;
-  worksheet.getCell(fields.whereFound).value = data.whereFound;
-  worksheet.getCell(fields.whenFound).value = data.whenFound;
-  worksheet.getCell(fields.countermeasure).value = data.countermeasure;
-  worksheet.getCell(fields.whereImplement).value = data.whereImplement;
-  worksheet.getCell(fields.whenImplement).value = data.whenImplement;
-  worksheet.getCell(fields.afterKaizen).value = data.afterKaizen;
-  worksheet.getCell(fields.tangibleBenefit).value = data.tangibleBenefit;
-  worksheet.getCell(fields.intangibleBenefit).value = data.intangibleBenefit;
-  worksheet.getCell(fields.whereImplemented).value = data.whereImplemented;
-  worksheet.getCell(fields.whenImplemented).value = data.whenImplemented;
-  worksheet.getCell(fields.issueDate).value = data.issueDate;
+  for (const key of Object.keys(fields) as (keyof typeof fields)[]) {
+    worksheet.getCell(fields[key]).value = data[key];
+  }
 
   if (data.photographBefore) {
     await addPhoto(
