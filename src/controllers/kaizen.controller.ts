@@ -2,11 +2,6 @@ import type { Request, Response } from "express";
 import { kaizenDataSchema, type KaizenData } from "../schemas/kaizen.schema.js";
 import { generateKaizen } from "../services/kaizenGenerator.js";
 
-interface UploadFiles {
-  photographBefore?: Express.Multer.File[];
-  photographAfter?: Express.Multer.File[];
-}
-
 export async function generateKaizenController(req: Request, res: Response) {
   try {
     const result = kaizenDataSchema.safeParse(req.body);
@@ -19,7 +14,8 @@ export async function generateKaizenController(req: Request, res: Response) {
       });
     }
 
-    const files = (req.files as UploadFiles | undefined) ?? {};
+    const files =
+      (req.files as Record<string, Express.Multer.File[] | undefined>) ?? {};
     const data: KaizenData = {
       ...result.data,
       ...(files.photographBefore?.[0]

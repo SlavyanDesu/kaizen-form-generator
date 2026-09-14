@@ -14,21 +14,4 @@ export default defineConfig({
     tseslint.configs.stylistic,
     eslintPluginPrettierRecommended,
   ],
-  languageOptions: {
-    globals: {
-      Cropper: "readonly",
-      DataTransfer: "readonly",
-      FormData: "readonly",
-      File: "readonly",
-      HTMLInputElement: "readonly",
-      URL: "readonly",
-      URLSearchParams: "readonly",
-      alert: "readonly",
-      console: "readonly",
-      document: "readonly",
-      fetch: "readonly",
-      localStorage: "readonly",
-      window: "readonly",
-    },
-  },
 });
